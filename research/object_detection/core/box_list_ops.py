@@ -24,6 +24,7 @@ Whenever box_list_ops functions output a BoxList, the fields of the incoming
 BoxList are retained unless documented otherwise.
 """
 import tensorflow as tf
+from pdb import set_trace
 
 from object_detection.core import box_list
 from object_detection.utils import ops
@@ -793,7 +794,7 @@ def to_normalized_coordinates(boxlist, height, width,
 
     if check_range:
       max_val = tf.reduce_max(boxlist.get())
-      max_assert = tf.Assert(tf.greater(max_val, 1.01),
+      max_assert = tf.Assert(tf.greater(max_val, 1.1),
                              ['max value is lower than 1.01: ', max_val])
       with tf.control_dependencies([max_assert]):
         width = tf.identity(width)
@@ -831,7 +832,7 @@ def to_absolute_coordinates(boxlist,
     width = tf.cast(width, tf.float32)
 
     # Ensure range of input boxes is correct.
-    if check_range:
+    if check_range == False:
       box_maximum = tf.reduce_max(boxlist.get())
       max_assert = tf.Assert(
           tf.greater_equal(maximum_normalized_coordinate, box_maximum),

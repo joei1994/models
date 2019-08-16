@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from glob import glob
 import os
+import time
 
 from detector.Detector import Detector
 
@@ -20,24 +21,48 @@ def saveImage(imageName, image, outputDir):
     outputPath = os.path.join(outputDir, imageName + '.jpg')
     cv2.imwrite(outputPath, image)
     
+def detectImages(detector, imagePaths):
+    for image_path in image_paths:
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        detections = detector.detect(image)
+        imageWithBbox = drawBbox(image, detections)
+        imageName = image_path.split('/')[-1].split('.')[0]
+        saveImage(imageName, imageWithBbox, './test_images/result')
 
+def detectVideo(detector, videoPath):
+    cap = cv2.VideoCapture(videoPath)
+    print(f"fps : {cap.get(5)}")
+    print(f"total frames : {cap.get(7)}")
+    
+    while(True):
+        ret, frame = cap.read()
+        frameIndex = int(cap.get(0))
+        if not ret:
+            break
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        startTime = time.time()
+        detections = detector.detect(frame)
+        endTime = time.time()
+        diffTime = endTime - startTime
+        print(f"fps: {1/(diffTime)}")
+        #imageWithBbox = drawBbox(frame, detections)
+        #saveImage(str(frameIndex), imageWithBbox, './test_images/result')
+        cv2.waitKey(27)
+    cap.release()
+    
 def main():
-    frozen_graph_path = './faster_rcnn_inception_resnet_v2_atrous_oid_v4_2018_12_12/frozen_inference_graph.pb'
-    label_map_path = './data/oid_v4_label_map.pbtxt'
+    frozen_graph_path = './ssd_mobilenet_v1_coco_2017_11_17/frozen_inference_graph.pb'
+    label_map_path = './data/mscoco_label_map.pbtxt'
     
     image_dir = './test_images/detect-plate'
+    videoPath = './test_images/detect-plate/cars.mp4'
   
     image_paths = [image for image in glob(image_dir + '**/*.jpg')]
     
     with Detector(frozen_graph_path, label_map_path) as detector:
-        for image_path in image_paths:
-            image = cv2.imread(image_path)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            detections = detector.detect(image)
-            
-            imageWithBbox = drawBbox(image, detections)
-            imageName = image_path.split('/')[-1].split('.')[0]
-            saveImage(imageName, imageWithBbox, './test_images/result')
+        detectVideo(detector, videoPath)
+
    
 if __name__ == '__main__':
     main()

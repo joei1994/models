@@ -23,8 +23,8 @@ import abc
 import collections
 import functools
 # Set headless-friendly backend.
-import matplotlib; matplotlib.use('Agg')  # pylint: disable=multiple-statements
-import matplotlib.pyplot as plt  # pylint: disable=g-import-not-at-top
+#import matplotlib; matplotlib.use('Agg')  # pylint: disable=multiple-statements
+#import matplotlib.pyplot as plt  # pylint: disable=g-import-not-at-top
 import numpy as np
 import PIL.Image as Image
 import PIL.ImageColor as ImageColor
@@ -103,6 +103,7 @@ def draw_bounding_box_on_image_array(image,
                                      thickness=4,
                                      display_str_list=(),
                                      use_normalized_coordinates=True):
+    
   """Adds a bounding box to an image (numpy array).
 
   Bounding box coordinates can be specified in either absolute (pixel) or
@@ -127,7 +128,6 @@ def draw_bounding_box_on_image_array(image,
                              thickness, display_str_list,
                              use_normalized_coordinates)
   np.copyto(image, np.array(image_pil))
-
 
 def draw_bounding_box_on_image(image,
                                ymin,
@@ -162,27 +162,29 @@ def draw_bounding_box_on_image(image,
       ymin, xmin, ymax, xmax as relative to the image.  Otherwise treat
       coordinates as absolute.
   """
+  display_str_list = [ds for ds in display_str_list]
   draw = ImageDraw.Draw(image)
   im_width, im_height = image.size
   if use_normalized_coordinates:
     (left, right, top, bottom) = (xmin * im_width, xmax * im_width,
                                   ymin * im_height, ymax * im_height)
+        
   else:
     (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
   draw.line([(left, top), (left, bottom), (right, bottom),
              (right, top), (left, top)], width=thickness, fill=color)
   try:
-    font = ImageFont.truetype('arial.ttf', 24)
+    font = ImageFont.truetype('/notebooks/projects/object-detection/models/research/object_detection/utils/fonts/angsa.ttf', 18)
   except IOError:
     font = ImageFont.load_default()
-
+    
   # If the total height of the display strings added to the top of the bounding
   # box exceeds the top of the image, stack the strings below the bounding box
   # instead of above.
   display_str_heights = [font.getsize(ds)[1] for ds in display_str_list]
   # Each display_str has a top and bottom margin of 0.05x.
   total_display_str_height = (1 + 2 * 0.05) * sum(display_str_heights)
-
+  
   if top > total_display_str_height:
     text_bottom = top
   else:
@@ -192,7 +194,7 @@ def draw_bounding_box_on_image(image,
     text_width, text_height = font.getsize(display_str)
     margin = np.ceil(0.05 * text_height)
     draw.rectangle(
-        [(left, text_bottom - text_height - 2 * margin), (left + text_width,
+        [(left, text_bottom - text_height - 2 * margin + .4*text_height), (left + text_width,
                                                           text_bottom)],
         fill=color)
     draw.text(

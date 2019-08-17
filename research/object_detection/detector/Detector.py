@@ -102,11 +102,11 @@ class Detector:
                            classes, 
                            scores,
                            categoryIndex,
-                           maxPrediction = 7,                           
-                           minScoreThresh = .5):
+                           maxDediction,                           
+                           minScoreThresh):
         detections = []
         height, width, _ = image.shape
-        for i in range(min(boxes.shape[0], maxPrediction)):
+        for i in range(min(boxes.shape[0], maxDediction)):
             if scores[i] > minScoreThresh:
                 ymin, xmin, ymax, xmax = tuple(boxes[i].tolist())
                 xmin, ymin, xmax, ymax = int(xmin * width), int(ymin * height), int(xmax * width), int(ymax * height)
@@ -131,13 +131,15 @@ class Detector:
         if self.session is not None:
             self.session.close()
     
-    def detect(self, image):
+    def detect(self, image, maxDetection = 1, minScoreThreshold = .5):
         outputDict = self._runInferenceForSingleImage(image)
         detections = self._chooseBestDetection(
             image,
             outputDict['detection_boxes'], 
             outputDict['detection_classes'], 
             outputDict['detection_scores'],
-            self.categoryIndex
+            self.categoryIndex,
+            maxDetection,
+            minScoreThreshold
         )
         return detections

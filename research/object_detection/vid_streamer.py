@@ -3,6 +3,7 @@ import numpy as np
 from glob import glob
 import os
 import time
+from pdb import set_trace
 
 from detector.Detector import Detector
 
@@ -22,7 +23,7 @@ def saveImage(imageName, image, outputDir):
     cv2.imwrite(outputPath, image)
     
 def detectImages(detector, imagePaths):
-    for image_path in image_paths:
+    for image_path in imagePaths:
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         detections = detector.detect(image)

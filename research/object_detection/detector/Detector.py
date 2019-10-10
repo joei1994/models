@@ -125,7 +125,9 @@ class Detector:
         return detections
     
     def openSession(self):
-        self.session = tf.Session(graph=self.graph) if (self.session is None) else self.session
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        self.session = tf.Session(graph=self.graph, config=config) if (self.session is None) else self.session
     
     def closeSession(self):
         if self.session is not None:

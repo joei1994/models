@@ -102,4 +102,7 @@ samples/outreach/blogs/segmentation_blogpost/carvana-image-masking-challenge/
 research/object_detection/test_images/
 research/object_detection/pre-trained-model
 research/object_detection/downloaded_models/
-workspace/
+workspace/*
+!/workspace/train.sh
+!/workspace/pipeline.config
+

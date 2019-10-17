@@ -104,5 +104,6 @@ research/object_detection/pre-trained-model
 research/object_detection/downloaded_models/
 workspace/*
 !/workspace/train.sh
+!/workspace/export.sh
 !/workspace/pipeline.config
 

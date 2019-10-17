@@ -22,14 +22,14 @@ def saveImage(imageName, image, outputDir):
     outputPath = os.path.join(outputDir, imageName + '.jpg')
     cv2.imwrite(outputPath, image)
     
-def detectImages(detector, imagePaths):
+def detectImages(detector, imagePaths, output_dir):
     for image_path in imagePaths:
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         detections = detector.detect(image)
         imageWithBbox = drawBbox(image, detections)
         imageName = image_path.split('/')[-1].split('.')[0]
-        saveImage(imageName, imageWithBbox, './test_images/result')
+        saveImage(imageName, imageWithBbox, output_dir)
 
 def detectVideo(detector, videoPath):
     cap = cv2.VideoCapture(videoPath)
@@ -56,13 +56,15 @@ def main():
     frozen_graph_path = './ssd_mobilenet_v1_coco_2017_11_17/frozen_inference_graph.pb'
     label_map_path = './data/mscoco_label_map.pbtxt'
     
-    image_dir = './test_images/detect-plate'
+    image_dir = './test_images/'
+    image_paths = [image for image in glob(image_dir + '*.jpg')]
+    output_dir = './test_images/result'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     videoPath = './test_images/detect-plate/cars.mp4'
-  
-    image_paths = [image for image in glob(image_dir + '**/*.jpg')]
-    
+
     with Detector(frozen_graph_path, label_map_path) as detector:
-        detectVideo(detector, videoPath)
+        detectImages(detector, videoPath, output_dir)
 
    
 if __name__ == '__main__':

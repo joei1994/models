@@ -19,6 +19,7 @@ These functions often receive an image, perform some visualization on the image.
 The functions do not return a value, instead they modify the image itself.
 
 """
+import os
 import abc
 import collections
 import functools
@@ -32,6 +33,7 @@ import PIL.ImageDraw as ImageDraw
 import PIL.ImageFont as ImageFont
 import six
 import tensorflow as tf
+from pdb import set_trace
 
 from object_detection.core import standard_fields as fields
 from object_detection.utils import shape_utils
@@ -174,7 +176,9 @@ def draw_bounding_box_on_image(image,
   draw.line([(left, top), (left, bottom), (right, bottom),
              (right, top), (left, top)], width=thickness, fill=color)
   try:
-    font = ImageFont.truetype('/notebooks/projects/object-detection/models/research/object_detection/utils/fonts/angsa.ttf', 18)
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    font_file_path = os.path.join(file_dir,'fonts' ,'angsa.ttf')
+    font = ImageFont.truetype(font_file_path, 18)
   except IOError:
     font = ImageFont.load_default()
     

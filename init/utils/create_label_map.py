@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
     parameter 2 : Path to label_map.pbtxt file to create
 '''
 
-def create_label_map(xml_dir, output_label_map_path):
+def create_label_map(xml_dir, output_label_map_path, target_classes):
     max_image_width = 0
     max_image_height = 0
     
@@ -35,6 +35,8 @@ def create_label_map(xml_dir, output_label_map_path):
             #    labels.add(ord(label))
             #else:
             #    labels.add(label)
+            if (target_classes != None) and (label not in target_classes):
+                continue
             labels.add(name[0].text)
     
     # create label_map and save

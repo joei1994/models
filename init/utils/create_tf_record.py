@@ -49,7 +49,8 @@ def get_file_name(image_path):
 
 def create_tf_example(image_path,
                       xml_path,
-                      label_map_dict):
+                      label_map_dict,
+                      target_classes):
     # read image
     with tf.gfile.GFile(image_path, 'rb') as fid:
         encoded_jpg = fid.read()
@@ -76,8 +77,10 @@ def create_tf_example(image_path,
     classes_text = []
     annotationElem = xml_dict['annotation']
     if 'object' in annotationElem:
-
         for obj in annotationElem['object']:
+            class_name = obj['name']
+            if (target_classes != None) and (class_name.lower() not in [tc.lower() for tc in target_classes]):
+                continue
             xmin, ymin, xmax, ymax = get_bbox_vertices(obj['bndbox'])    
             
             #verfiy bbox
@@ -88,7 +91,6 @@ def create_tf_example(image_path,
             xmaxs.append(xmax / width)
             ymaxs.append(ymax / height)
     
-            class_name = obj['name']
             classes_text.append(class_name.encode('utf8'))
             classes.append(label_map_dict[class_name])
 
@@ -115,7 +117,8 @@ def create_tf_record(xmls_dir,
                     image_names,
                     label_map_dict,
                     output_filename,
-                    num_shards): 
+                    num_shards,
+                    target_classes): 
     with contextlib2.ExitStack() as tf_record_close_stack:
         output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(tf_record_close_stack, output_filename, num_shards)
         for idx, image_name in enumerate(image_names):
@@ -133,14 +136,14 @@ def create_tf_record(xmls_dir,
                 continue
                 
             try:
-                tf_example = create_tf_example(image_file, xml_file, label_map_dict)
+                tf_example = create_tf_example(image_file, xml_file, label_map_dict, target_classes)
                 if tf_example:
                     shard_idx = idx % num_shards
                     output_tfrecords[shard_idx].write(tf_example.SerializeToString())
             except ValueError:
                 logging.warning('Invalid example: %s, ignoring.', xml_file)
                 
-def generate_tf_records(dataset_dir, label_map_file, tf_record_dir, train_ratio=.8, num_shards=10):
+def generate_tf_records(dataset_dir, label_map_file, tf_record_dir, train_ratio=.8, num_shards=10, target_classes=None):
     label_map_dict = label_map_util.get_label_map_dict(label_map_file)
     image_names = [get_file_name(f) for f in glob.glob(dataset_dir + '**/*.jpg')]
     
@@ -173,7 +176,8 @@ def generate_tf_records(dataset_dir, label_map_file, tf_record_dir, train_ratio=
         train_images,
         label_map_dict,
         train_output_path,
-        num_shards
+        num_shards,
+        target_classes
     )
     
     create_tf_record(
@@ -182,7 +186,8 @@ def generate_tf_records(dataset_dir, label_map_file, tf_record_dir, train_ratio=
         val_images,
         label_map_dict,
         val_output_path,
-        num_shards
+        num_shards,
+        target_classes
     )
     
 if __name__ == '__main__':
